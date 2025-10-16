@@ -1,24 +1,16 @@
 # 🧠 SQL Repository  
-
-¡Bienvenido a mi espacio de proyectos SQL! 🚀  
-Aquí encontrarás distintos ejercicios, análisis y prácticas orientadas al manejo de **bases de datos**, **optimización de consultas**, y **automatización de análisis de datos**.  
-
-Este repositorio reúne ejemplos y casos que aplican conceptos de:
-- **Data Cleaning** y transformación de datos  
+Welcome to my SQL projects space! 🚀  
+Here you'll find various exercises, analyses, and practices focused on **database management**, **query optimization**, and **data analysis automation**.  
+This repository brings together examples and cases that apply concepts of:
+- **Data Cleaning** and data transformation  
 - **Exploratory Data Analysis (EDA)**  
-- **Consultas avanzadas con T-SQL**  
-- **Integración con herramientas BI** (como Power BI)  
-
-Cada carpeta contiene scripts y ejemplos comentados para facilitar su comprensión y reutilización.  
-
-> 💡 Este repositorio está en constante actualización.  
-
+- **Advanced queries with T-SQL**  
+- **Integration with BI tools** (such as Power BI)  
+Each folder contains commented scripts and examples to facilitate their understanding and reusability.  
+> 💡 This repository is constantly being updated.  
 ---
-
-📫 **Contacto:**  
-Si te interesa intercambiar ideas o colaborar en proyectos de análisis de datos, puedes contactarme en:  
+📫 **Contact:**  
+If you're interested in exchanging ideas or collaborating on data analysis projects, you can contact me at:  
 **[LinkedIn](https://www.linkedin.com/in/felipedeleon9)** | **[GitHub](https://github.com/FelipeDeLeon9)**  
-
 ---
-
-🗂️ *Lenguaje principal:* **T-SQL**
+🗂️ *Main language:* **T-SQL**
