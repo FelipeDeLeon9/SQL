@@ -1,32 +1,32 @@
 -- ============================================================================
--- CONFIGURACIÓN INICIAL DE LA BASE DE DATOS IngramBI
+-- INGRAMBI DATABASE INITIAL CONFIGURATION
 -- ============================================================================
--- Sistema de Business Intelligence para análisis de ventas y tickets de soporte
--- Autor: Felipe De León
--- Fecha: 15/10/2025
+-- Business Intelligence System for sales analysis and support tickets
+-- Author: Felipe De León
+-- Date: 10/15/2025
 -- ============================================================================
 
--- Crear la nueva base de datos para el sistema BI
+-- Create new database for BI system
 CREATE DATABASE IngramBI;
 GO
 
--- Seleccionar la base de datos recién creada
+-- Select the newly created database
 USE IngramBI;
 GO
 
 -- ============================================================================
--- CREACIÓN DE SCHEMAS PARA ORGANIZACIÓN LÓGICA
+-- SCHEMA CREATION FOR LOGICAL ORGANIZATION
 -- ============================================================================
 
--- Schema para tablas de dimensiones (datos maestros)
+-- Schema for dimension tables (master data)
 CREATE SCHEMA dim;
 GO
 
--- Schema para tablas de hechos (transacciones)
+-- Schema for fact tables (transactions)
 CREATE SCHEMA fact;
 GO
 
--- Schema para operaciones y tickets de soporte
+-- Schema for operations and support tickets
 CREATE SCHEMA ops;
 GO
 
@@ -34,44 +34,44 @@ USE IngramBI;
 GO
 
 -- ============================================================================
--- VERIFICACIÓN DE CARGA DE DATOS
+-- DATA LOAD VERIFICATION
 -- ============================================================================
--- Después de importar los archivos CSV, se verifican todas las tablas
+-- After importing CSV files, verify all tables
 
--- Verificar tabla de calendario (dimensión temporal)
+-- Verify calendar table (time dimension)
 SELECT *
 FROM dim.Calendar;
 
--- Verificar catálogo de productos
+-- Verify product catalog
 SELECT *
 FROM dim.Products;
 
--- Verificar catálogo de clientes
+-- Verify customer catalog
 SELECT *
 FROM dim.Customers;
 
--- Verificar tabla de hechos de ventas
+-- Verify sales fact table
 SELECT *
 FROM fact.Sales;
 
--- Verificar tabla de tickets de soporte
+-- Verify support tickets table
 SELECT *
 FROM ops.Tickets;
 GO
 
 -- ============================================================================
--- LIMPIEZA Y TRANSFORMACIÓN DE DATOS
+-- DATA CLEANING AND TRANSFORMATION
 -- ============================================================================
 
--- Revisar distribución de valores en la columna SLA_Met
--- Permite identificar valores incorrectos o inconsistentes
+-- Review value distribution in SLA_Met column
+-- Allows identification of incorrect or inconsistent values
 SELECT SLA_Met, COUNT(*) AS Cantidad
 FROM ops.Tickets
 GROUP BY SLA_Met;
 GO
 
--- Estandarizar la columna SLA_Met para que contenga solo valores 1 o 0
--- Convierte cualquier valor distinto de 1 a 0
+-- Standardize SLA_Met column to contain only values 1 or 0
+-- Converts any value other than 1 to 0
 UPDATE ops.Tickets
 SET SLA_Met = CASE 
               WHEN SLA_Met = 1 THEN 1 
@@ -79,47 +79,47 @@ SET SLA_Met = CASE
 END;
 GO
 
--- Cambiar el tipo de dato de SLA_Met de INT a BIT (booleano)
--- Optimiza el almacenamiento y deja clara la naturaleza binaria del campo
+-- Change SLA_Met data type from INT to BIT (boolean)
+-- Optimizes storage and makes the binary nature of the field clear
 ALTER TABLE ops.Tickets
 ALTER COLUMN SLA_Met bit;
 GO
 
 -- ============================================================================
--- CREACIÓN DE ÍNDICES PARA OPTIMIZACIÓN DE CONSULTAS
+-- INDEX CREATION FOR QUERY OPTIMIZATION
 -- ============================================================================
 
--- Índice compuesto en fact.Sales para consultas por fecha y canal
--- INCLUDE agrega columnas a nivel de hoja para evitar lookups
+-- Composite index on fact.Sales for queries by date and channel
+-- INCLUDE adds columns at leaf level to avoid lookups
 CREATE INDEX IX_salesfact_OrderDate_Channel
 ON fact.Sales (OrderDate, Channel)
 INCLUDE (LineAmount, Qty, DiscountPct, UnitPrice, ListPrice, ProductID, CustomerID);
 
--- Índice en fact.Sales para consultas por cliente
--- Optimiza JOINs y agregaciones por CustomerID
+-- Index on fact.Sales for queries by customer
+-- Optimizes JOINs and aggregations by CustomerID
 CREATE INDEX IX_salesfact_Customer
 ON fact.Sales (CustomerID)
 INCLUDE (LineAmount, OrderDate);
 
--- Índice en fact.Sales para consultas por producto
--- Optimiza análisis de productos y categorías
+-- Index on fact.Sales for queries by product
+-- Optimizes product and category analysis
 CREATE INDEX IX_salesfact_Product
 ON fact.Sales (ProductID)
 INCLUDE (LineAmount, OrderDate);
 
--- Índice compuesto en ops.Tickets para análisis de prioridad por región
--- Facilita reportes de cumplimiento SLA por segmentos
+-- Composite index on ops.Tickets for priority analysis by region
+-- Facilitates SLA compliance reports by segments
 CREATE INDEX IX_Tickets_Priority_Region
 ON ops.Tickets (Priority, Region)
 INCLUDE (SLA_Met);
 GO
 
 -- ============================================================================
--- ANÁLISIS EXPLORATORIO INICIAL
+-- INITIAL EXPLORATORY ANALYSIS
 -- ============================================================================
 
--- 1. RESUMEN GENERAL DE REGISTROS EN TODAS LAS TABLAS
--- Proporciona una vista rápida del volumen de datos en el sistema
+-- 1. GENERAL SUMMARY OF RECORDS IN ALL TABLES
+-- Provides a quick view of data volume in the system
 SELECT 
     'Productos' AS Tabla, COUNT(*) AS Registros FROM dim.Products
 UNION ALL
@@ -131,16 +131,16 @@ SELECT 'Ventas', COUNT(*) FROM fact.Sales
 UNION ALL
 SELECT 'Tickets', COUNT(*) FROM ops.Tickets;
 
--- 2. PERÍODO DE ANÁLISIS DE VENTAS
--- Identifica el rango temporal de las transacciones de venta
+-- 2. SALES ANALYSIS PERIOD
+-- Identifies the time range of sales transactions
 SELECT 
     MIN(OrderDate) AS PrimeraVenta,
     MAX(OrderDate) AS ÚltimaVenta,
     DATEDIFF(day, MIN(OrderDate), MAX(OrderDate)) AS DíasDeOperación
 FROM fact.Sales;
 
--- 3. PERÍODO DE ANÁLISIS DE TICKETS
--- Identifica el rango temporal de los tickets de soporte
+-- 3. TICKETS ANALYSIS PERIOD
+-- Identifies the time range of support tickets
 SELECT 
     MIN(CreatedAt) AS PrimerTicket,
     MAX(CreatedAt) AS ÚltimoTicket,
@@ -149,11 +149,11 @@ FROM ops.Tickets;
 GO
 
 -- ============================================================================
--- ANÁLISIS DE VENTAS - MÉTRICAS CLAVE DEL NEGOCIO
+-- SALES ANALYSIS - KEY BUSINESS METRICS
 -- ============================================================================
 
--- KPIs PRINCIPALES DEL NEGOCIO
--- Métricas fundamentales: órdenes, clientes, productos, unidades y ventas totales
+-- MAIN BUSINESS KPIS
+-- Fundamental metrics: orders, customers, products, units and total sales
 SELECT
     FORMAT(COUNT(DISTINCT OrderID),  'N0', 'es-CO') AS Total_Ordenes,
     FORMAT(COUNT(DISTINCT CustomerID),'N0', 'es-CO') AS Clientes_Activos,
@@ -164,13 +164,13 @@ SELECT
 FROM fact.Sales;
 GO
 
--- PERFORMANCE POR CANAL DE VENTA
--- Analiza el desempeño de cada canal (Online, Retail, Distributor)
--- Excluye devoluciones y cancelaciones para calcular ventas netas
+-- PERFORMANCE BY SALES CHANNEL
+-- Analyzes performance of each channel (Online, Retail, Distributor)
+-- Excludes returns and cancellations to calculate net sales
 SELECT
     Channel AS Canal,
     COUNT(DISTINCT OrderID) AS Ordenes,
-    -- Ventas netas: excluye transacciones devueltas o canceladas
+    -- Net sales: excludes returned or cancelled transactions
     FORMAT(
         SUM(CASE WHEN IsReturn = 0 AND IsCancelled = 0 THEN LineAmount ELSE 0 END),
         'C0', 'es-CO'
@@ -183,14 +183,14 @@ ORDER BY
     SUM(CASE WHEN IsReturn = 0 AND IsCancelled = 0 THEN LineAmount ELSE 0 END) DESC;
 GO
 
--- TOP 10 PRODUCTOS ESTRELLA POR INGRESOS
--- Identifica los productos más rentables del catálogo
--- Útil para estrategias de inventario y marketing
+-- TOP 10 STAR PRODUCTS BY REVENUE
+-- Identifies the most profitable products in the catalog
+-- Useful for inventory and marketing strategies
 SELECT TOP 10
     p.ProductName AS Producto,
     p.Category    AS Categoria,
     p.Brand       AS Marca,
-    -- Calcula ventas netas excluyendo devoluciones y cancelaciones
+    -- Calculates net sales excluding returns and cancellations
     FORMAT(
         SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END),
         'C0',
@@ -203,24 +203,24 @@ ORDER BY
     SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END) DESC;
 GO
 
--- TOP 5 CLIENTES MÁS VALIOSOS
--- Análisis de clientes VIP para estrategias de retención
--- Incluye métricas de recencia (días sin comprar)
+-- TOP 5 MOST VALUABLE CUSTOMERS
+-- VIP customer analysis for retention strategies
+-- Includes recency metrics (days without purchase)
 SELECT TOP 5
     c.CustomerName AS Cliente,
     c.Region       AS Región,
     c.Segment      AS Segmento,
     COUNT(DISTINCT s.OrderID) AS Total_Ordenes,
     SUM(s.Qty)                AS Unidades_Compradas,
-    -- Ventas netas sin devoluciones ni cancelaciones
+    -- Net sales without returns or cancellations
     FORMAT(
         SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END),
         'C0', 'es-CO'
     ) AS Ventas_Neta,
     FORMAT(AVG(s.LineAmount), 'N0', 'es-CO') AS TicketPromedio,
-    -- Fecha de última compra en formato ISO (YYYY-MM-DD)
+    -- Last purchase date in ISO format (YYYY-MM-DD)
     CONVERT(varchar(10), MAX(s.OrderDate), 23) AS Última_Compra,
-    -- Métrica de recencia: días transcurridos desde la última compra
+    -- Recency metric: days elapsed since last purchase
     DATEDIFF(day, MAX(s.OrderDate), GETDATE()) AS Días_Sin_Comprar
 FROM fact.Sales s
 INNER JOIN dim.Customers c ON s.CustomerID = c.CustomerID
@@ -229,14 +229,14 @@ ORDER BY
     SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END) DESC;
 GO
 
--- PERFORMANCE POR REGIÓN GEOGRÁFICA
--- Compara el desempeño comercial en diferentes regiones
--- Permite identificar mercados fuertes y oportunidades de crecimiento
+-- PERFORMANCE BY GEOGRAPHIC REGION
+-- Compares commercial performance in different regions
+-- Allows identification of strong markets and growth opportunities
 SELECT
     c.Region AS Región,
     COUNT(DISTINCT c.CustomerID) AS Clientes,
     COUNT(DISTINCT s.OrderID)    AS Órdenes,
-    -- Ventas netas por región
+    -- Net sales by region
     FORMAT(
         SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END),
         'C0','es-CO'
@@ -250,9 +250,9 @@ ORDER BY
     SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END) DESC;  
 GO
 
--- TENDENCIA DE VENTAS POR MES
--- Análisis temporal para identificar estacionalidad y tendencias
--- Útil para pronósticos y planificación de inventario
+-- SALES TREND BY MONTH
+-- Temporal analysis to identify seasonality and trends
+-- Useful for forecasting and inventory planning
 SELECT
     cal.Year      AS Año,
     cal.Month     AS Mes,
@@ -260,7 +260,7 @@ SELECT
     FORMAT(COUNT(DISTINCT s.OrderID), 'N0', 'es-CO') AS Órdenes,
     FORMAT(SUM(s.Qty),        'N0', 'es-CO') AS Unidades_Vendidas,
     FORMAT(AVG(s.LineAmount), 'N0', 'es-CO') AS Tickets_Promedio,
-    -- Ventas netas mensuales
+    -- Monthly net sales
     FORMAT(
         SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END),
         'C0', 'es-CO'
@@ -272,11 +272,11 @@ GROUP BY cal.Year, cal.Month, cal.MonthName
 ORDER BY cal.Year, cal.Month;
 GO
 
--- IMPACTO DE DESCUENTOS EN VOLUMEN DE VENTAS
--- Analiza la efectividad de las estrategias de descuento
--- Agrupa las transacciones por rangos de descuento aplicado
+-- DISCOUNT IMPACT ON SALES VOLUME
+-- Analyzes effectiveness of discount strategies
+-- Groups transactions by applied discount ranges
 SELECT
-    -- Categorización de descuentos en rangos
+    -- Discount categorization into ranges
     CASE
         WHEN DiscountPct = 0  THEN 'Sin Descuento'
         WHEN DiscountPct <= 10 THEN '1–10%'
@@ -299,33 +299,33 @@ ORDER BY AVG(DiscountPct);
 GO
 
 -- ============================================================================
--- ANÁLISIS DE TICKETS DE SOPORTE
+-- SUPPORT TICKETS ANALYSIS
 -- ============================================================================
 
--- MÉTRICAS CLAVE DEL SERVICIO AL CLIENTE
--- KPIs principales: volumen, tiempos de resolución y cumplimiento SLA
+-- KEY CUSTOMER SERVICE METRICS
+-- Main KPIs: volume, resolution times and SLA compliance
 SELECT
     FORMAT(COUNT(*), 'N0', 'es-CO') AS TotalTickets,
-    -- Promedio de horas para resolver tickets
+    -- Average hours to resolve tickets
     FORMAT(AVG(CAST(Resolution_Hours AS float)), 'N2', 'es-CO') AS PromedioHorasResolucion,
     FORMAT(MIN(Resolution_Hours), 'N0', 'es-CO') AS MenorTiempoResolucion_hrs,
     FORMAT(MAX(Resolution_Hours), 'N0', 'es-CO') AS MayorTiempoResolucion_hrs,
-    -- Porcentaje de tickets resueltos dentro del SLA
+    -- Percentage of tickets resolved within SLA
     FORMAT(AVG(CASE WHEN SLA_Met = 1 THEN 1.0 ELSE 0.0 END), 'P2','es-CO') AS PorcentajeCumplimientoSLA
 FROM ops.Tickets;
 
--- PERFORMANCE POR NIVEL DE PRIORIDAD
--- Analiza cumplimiento SLA según urgencia del ticket
--- Ordena de mayor a menor criticidad
+-- PERFORMANCE BY PRIORITY LEVEL
+-- Analyzes SLA compliance according to ticket urgency
+-- Orders from highest to lowest criticality
 SELECT
     Priority AS Prioridad,
     FORMAT(COUNT(*), 'N0', 'es-CO') AS TotalTickets,          
-    -- Tasa de cumplimiento SLA por prioridad
+    -- SLA compliance rate by priority
     FORMAT(AVG(CASE WHEN SLA_Met = 1 THEN 1.0 ELSE 0.0 END),
            'P2', 'es-CO') AS PorcentajeCumplimientoSLA  
 FROM ops.Tickets
 GROUP BY Priority
--- Ordenamiento personalizado por nivel de prioridad
+-- Custom ordering by priority level
 ORDER BY CASE LOWER(Priority)
            WHEN 'critical' THEN 1
            WHEN 'high'    THEN 2
@@ -335,14 +335,14 @@ ORDER BY CASE LOWER(Priority)
          END;
 GO
 
--- TENDENCIA DE TICKETS POR MES
--- Identifica patrones temporales en la generación de tickets
--- Útil para dimensionar equipos de soporte
+-- TICKET TREND BY MONTH
+-- Identifies temporal patterns in ticket generation
+-- Useful for sizing support teams
 SELECT
     YEAR(CreatedAt)  AS Año,
     MONTH(CreatedAt) AS Mes,
     FORMAT(COUNT(*), 'N0', 'es-CO') AS TotalTickets,        
-    -- Cumplimiento SLA mensual
+    -- Monthly SLA compliance
     FORMAT(
         AVG(CASE WHEN SLA_Met = 1 THEN 1.0 ELSE 0.0 END), 
         'P2', 'es-CO'
@@ -352,14 +352,14 @@ GROUP BY YEAR(CreatedAt), MONTH(CreatedAt)
 ORDER BY Año, Mes;
 
 -- ============================================================================
--- ANÁLISIS CRUZADOS: VENTAS + TICKETS
+-- CROSS ANALYSIS: SALES + TICKETS
 -- ============================================================================
 
--- CORRELACIÓN ENTRE VENTAS Y SOPORTE POR REGIÓN
--- Relaciona actividad comercial con demanda de soporte técnico
--- Identifica regiones con alta carga de servicio vs. ventas
+-- CORRELATION BETWEEN SALES AND SUPPORT BY REGION
+-- Relates commercial activity with technical support demand
+-- Identifies regions with high service load vs. sales
 WITH VentasPorRegion AS (
-    -- Calcula métricas de venta por región
+    -- Calculate sales metrics by region
     SELECT 
         c.Region,
         COUNT(DISTINCT s.OrderID) AS TotalÓrdenes,
@@ -369,7 +369,7 @@ WITH VentasPorRegion AS (
     GROUP BY c.Region
 ),
 TicketsPorRegion AS (
-    -- Calcula métricas de soporte por región
+    -- Calculate support metrics by region
     SELECT 
         Region,
         COUNT(*) AS TotalTickets,
@@ -378,13 +378,13 @@ TicketsPorRegion AS (
     FROM ops.Tickets
     GROUP BY Region
 )
--- Combina ambas métricas para análisis integral
+-- Combine both metrics for comprehensive analysis
 SELECT 
     v.Region AS Región,
     v.TotalÓrdenes AS Órdenes,
     v.VentaNeta AS VentaNeta,
     t.TotalTickets AS Tickets,
-    -- Ratio de tickets por orden (indicador de calidad/complejidad)
+    -- Ticket per order ratio (quality/complexity indicator)
     CAST(t.TotalTickets AS FLOAT) / v.TotalÓrdenes AS TicketsPorOrden,
     t.PromedioResolución AS HorasPromedioResolución,
     t.CumplimientoSLA AS PorcentajeSLA
@@ -393,40 +393,40 @@ LEFT JOIN TicketsPorRegion t ON v.Region = t.Region
 ORDER BY v.VentaNeta DESC;
 
 -- ============================================================================
--- ANÁLISIS AVANZADO: RENTABILIDAD Y SEGMENTACIÓN RFM
+-- ADVANCED ANALYSIS: PROFITABILITY AND RFM SEGMENTATION
 -- ============================================================================
 
--- ANÁLISIS INTEGRAL DE RENTABILIDAD POR CLIENTE
--- Implementa modelo RFM (Recency, Frequency, Monetary)
--- Incluye costos de soporte para calcular rentabilidad neta
+-- COMPREHENSIVE PROFITABILITY ANALYSIS BY CUSTOMER
+-- Implements RFM model (Recency, Frequency, Monetary)
+-- Includes support costs to calculate net profitability
 WITH ClienteRFM AS (
-    -- CTE 1: Calcula métricas RFM por cliente
+    -- CTE 1: Calculate RFM metrics per customer
     SELECT 
         c.CustomerID,
         c.CustomerName,
         c.Region,
         c.Segment,
-        -- Recency: días desde la última compra
+        -- Recency: days since last purchase
         DATEDIFF(day, MAX(s.OrderDate), GETDATE()) AS DíasSinComprar,
-        -- Frequency: número de órdenes
+        -- Frequency: number of orders
         COUNT(DISTINCT s.OrderID) AS TotalÓrdenes,
-        -- Monetary: valor total de compras netas
+        -- Monetary: total net purchase value
         SUM(CASE WHEN s.IsReturn = 0 AND s.IsCancelled = 0 THEN s.LineAmount ELSE 0 END) AS VentaNetaTotal,
         AVG(s.LineAmount) AS TicketPromedio,
-        -- Tasa de devolución como indicador de satisfacción
+        -- Return rate as satisfaction indicator
         CAST(SUM(CASE WHEN s.IsReturn = 1 THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*) * 100 AS TasaDevolución
     FROM dim.Customers c
     INNER JOIN fact.Sales s ON c.CustomerID = s.CustomerID
     GROUP BY c.CustomerID, c.CustomerName, c.Region, c.Segment
 ),
 ClienteTickets AS (
-    -- CTE 2: Calcula costos de soporte por cliente
+    -- CTE 2: Calculate support costs per customer
     SELECT 
         c.CustomerID,
         COUNT(t.TicketID) AS TotalTickets,
         AVG(t.Resolution_Hours) AS PromedioHorasResolución,
         SUM(CASE WHEN t.SLA_Met = 0 THEN 1 ELSE 0 END) AS TicketsSLAIncumplido,
-        -- Estimación de costo: $50 por hora de soporte
+        -- Cost estimation: $50 per support hour
         SUM(t.Resolution_Hours) * 50 AS CostoSoporteEstimado
     FROM dim.Customers c
     LEFT JOIN fact.Sales s ON c.CustomerID = s.CustomerID
@@ -436,28 +436,28 @@ ClienteTickets AS (
     GROUP BY c.CustomerID
 ),
 Segmentacion AS (
-    -- CTE 3: Combina métricas y crea segmentaciones estratégicas
+    -- CTE 3: Combine metrics and create strategic segmentations
     SELECT 
         r.*,
         ISNULL(t.TotalTickets, 0) AS TotalTickets,
         ISNULL(t.PromedioHorasResolución, 0) AS HorasResolución,
         ISNULL(t.TicketsSLAIncumplido, 0) AS SLAIncumplidos,
         ISNULL(t.CostoSoporteEstimado, 0) AS CostoSoporte,
-        -- Rentabilidad neta: ventas menos costos de soporte
+        -- Net profitability: sales minus support costs
         r.VentaNetaTotal - ISNULL(t.CostoSoporteEstimado, 0) AS RentabilidadNeta,
-        -- Segmentación por recencia
+        -- Segmentation by recency
         CASE 
             WHEN r.DíasSinComprar <= 30 THEN 'Activo'
             WHEN r.DíasSinComprar <= 90 THEN 'En Riesgo'
             ELSE 'Inactivo'
         END AS EstadoRecencia,
-        -- Segmentación por frecuencia de compra
+        -- Segmentation by purchase frequency
         CASE 
             WHEN r.TotalÓrdenes >= 10 THEN 'Alto'
             WHEN r.TotalÓrdenes >= 5  THEN 'Medio'
             ELSE 'Bajo'
         END AS NivelFrecuencia,
-        -- Segmentación por valor monetario (tier)
+        -- Segmentation by monetary value (tier)
         CASE 
             WHEN r.VentaNetaTotal >= 100000 THEN 'Premium'
             WHEN r.VentaNetaTotal >=  50000 THEN 'Gold'
@@ -467,7 +467,7 @@ Segmentacion AS (
     FROM ClienteRFM r
     LEFT JOIN ClienteTickets t ON r.CustomerID = t.CustomerID
 )
--- Query final: Reporte ejecutivo de rentabilidad por cliente
+-- Final query: Executive profitability report by customer
 SELECT 
     s.CustomerName AS Cliente,
     s.Region       AS Region,
@@ -481,9 +481,9 @@ SELECT
     FORMAT(s.HorasResolución,  'N0', 'es-CO') AS Horas_de_Soporte,
     FORMAT(s.VentaNetaTotal,   'C0', 'es-CO') AS VentaTotal,
     FORMAT(s.CostoSoporte,     'C0', 'es-CO') AS CostoSoporte,
-    -- Métrica clave: rentabilidad después de descontar costos de servicio
+    -- Key metric: profitability after deducting service costs
     FORMAT(s.RentabilidadNeta, 'C0', 'es-CO') AS RentabilidadNeta
 FROM Segmentacion s
--- Ordena por rentabilidad para priorizar clientes más valiosos
+-- Order by profitability to prioritize most valuable customers
 ORDER BY s.RentabilidadNeta DESC;
 GO
