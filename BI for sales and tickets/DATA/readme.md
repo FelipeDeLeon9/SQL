@@ -1,16 +1,18 @@
-📊 Business Intelligence System for Sales and Tickets
+# 📊 RetailBI - Business Intelligence System
 
-A complete Business Intelligence system for sales and customer service analysis, built with SQL Server.
+Complete Business Intelligence system for sales and customer service analysis, built with SQL Server.
 
-🎯 Project Description
+## 🎯 Project Description
 
-This is a business data analysis system that integrates sales and technical support ticket information to generate actionable insights. The project includes a full database structure, data cleaning, performance optimization through indexes, and more than 15 advanced analytical queries.
+RetailBI is a business data analysis system that integrates sales information and technical support tickets to generate actionable insights. The project includes the complete database structure, data cleaning, optimization through indexes, and more than 15 advanced analytical queries.
 
-⚠️ Important Note About the Data
+## ⚠️ Important Note About the Data
 
-The datasets used in this project were entirely generated with Artificial Intelligence for educational and demonstration purposes. The data does NOT represent real information from any company.
+**The datasets used in this project were completely generated with Artificial Intelligence** for educational and demonstration purposes. The data does NOT represent real information from any company.
 
-🗂️ Project Structure
+## 🗂️ Project Structure
+
+```
 SQL/
 ├── BI for sales and tickets/
 │   ├── DATA/
@@ -22,168 +24,120 @@ SQL/
 │   ├── DATA CLEANING/
 │   ├── EXPLORATORY DATA ANALYSIS/
 │   └── Queries_for_BIsql.sql
+```
 
-📋 Main Features
-1. Database Architecture
+## 📋 Key Features
 
-3 organized schemas: dim, fact, ops
+### 1. Database Architecture
+- **3 Organized Schemas**: `dim`, `fact`, `ops`
+- **5 Main Tables**:
+  - `dim.Calendar` - Time dimension
+  - `dim.Products` - Product catalog
+  - `dim.Customers` - Customer data
+  - `fact.Sales` - Sales transactions
+  - `ops.Tickets` - Support ticket system
 
-5 main tables:
+### 2. Performance Optimization
+- Strategic composite indexes
+- Indexes with INCLUDE columns to avoid lookups
+- Complex query optimization with CTEs
 
-dim.Calendar - Time dimension
+### 3. Implemented Analytics
 
-dim.Products - Product catalog
+#### 📈 Sales Analysis
+- Main business KPIs
+- Performance by sales channel
+- Top 10 star products
+- Top 5 most valuable customers
+- Analysis by geographic region
+- Time trends (monthly)
+- Discount impact on volume
 
-dim.Customers - Customer data
+#### 🎫 Ticket Analysis
+- Customer service metrics
+- Performance by priority level
+- SLA compliance
+- Ticket time trends
 
-fact.Sales - Sales transactions
+#### 💰 Advanced Analytics
+- **Cross Analysis**: Sales vs. tickets correlation by region
+- **RFM Model**: Customer segmentation (Recency, Frequency, Monetary)
+- **Net Profitability**: Includes estimated support costs
+- **Strategic Segmentation**: Customer tiers (Premium, Gold, Silver, Bronze)
 
-ops.Tickets - Support ticket system
+## 🚀 How to Use
 
-2. Performance Optimization
+### Prerequisites
+- SQL Server 2016 or higher
+- SQL Server Management Studio (SSMS)
 
-Strategic composite indexes
+### Installation
 
-Indexes with INCLUDE columns to avoid lookups
-
-Optimization of complex queries using CTEs
-
-3. Implemented Analyses
-📈 Sales Analysis
-
-Key business KPIs
-
-Performance by sales channel
-
-Top 10 best-selling products
-
-Top 5 most valuable customers
-
-Analysis by geographic region
-
-Temporal trends (monthly)
-
-Impact of discounts on volume
-
-🎫 Ticket Analysis
-
-Customer service metrics
-
-Performance by priority level
-
-SLA compliance
-
-Ticket time trends
-
-💰 Advanced Analyses
-
-Cross Analysis: Correlation between sales and tickets by region
-
-RFM Model: Customer segmentation (Recency, Frequency, Monetary)
-
-Net Profitability: Includes estimated support costs
-
-Strategic Segmentation: Customer tiers (Premium, Gold, Silver, Bronze)
-
-🚀 How to Use
-Prerequisites
-
-SQL Server 2016 or later
-
-SQL Server Management Studio (SSMS)
-
-Installation
-
-Clone the repository
-
+1. **Clone the repository**
+```bash
 git clone https://github.com/FelipeDeLeon9/SQL.git
 cd SQL/BI\ for\ sales\ and\ tickets
+```
 
+2. **Create the database**
+   - Open `Queries_for_BIsql.sql` in SSMS
+   - Execute the database and schema creation section
 
-Create the database
+3. **Import CSV data**
+   - Import each CSV file from the `DATA/` folder to their respective tables
+   - Follow the order: Calendar → Products → Customers → Sales → Tickets
 
-Open Queries_for_BIsql.sql in SSMS
+4. **Run cleaning and optimization**
+   - Execute the data cleaning sections
+   - Create the recommended indexes
 
-Run the database and schema creation sections
+5. **Run analytics**
+   - Queries are organized by section
+   - Each query is fully documented
 
-Import the CSV data
+## 📊 Examples of Generated Insights
 
-Import each CSV file from the DATA/ folder into its respective table
+- 🏆 Identification of most profitable products
+- 👥 RFM customer segmentation
+- 📍 Regions with best/worst performance
+- 🎯 Correlation between sales and support load
+- 💵 Net profitability by customer (sales - support costs)
+- 📅 Seasonality in sales and tickets
 
-Follow this order: Calendar → Products → Customers → Sales → Tickets
+## 🛠️ Technologies Used
 
-Run cleaning and optimization
+- **SQL Server** - Database engine
+- **T-SQL** - Query language
+- **CTEs (Common Table Expressions)** - Modular complex queries
+- **Window Functions** - Advanced analytics
+- **Composite Indexes** - Performance optimization
 
-Execute the data cleaning sections
-
-Create the recommended indexes
-
-Run analyses
-
-Queries are organized by section
-
-Each query is fully documented
-
-📊 Sample Insights Generated
-
-🏆 Identification of the most profitable products
-
-👥 RFM-based customer segmentation
-
-📍 Regions with best/worst performance
-
-🎯 Correlation between sales and support workload
-
-💵 Net profitability per customer (sales - support costs)
-
-📅 Seasonality in sales and tickets
-
-🛠️ Technologies Used
-
-SQL Server – Database engine
-
-T-SQL – Query language
-
-CTEs (Common Table Expressions) – Modular complex queries
-
-Window Functions – Advanced analytics
-
-Composite Indexes – Performance optimization
-
-📝 Code Documentation
+## 📝 Code Documentation
 
 All SQL code is fully commented in Spanish, including:
+- Purpose of each query
+- Business logic explanation
+- Description of calculated metrics
+- Context of each analysis
 
-Purpose of each query
-
-Business logic explanation
-
-Description of calculated metrics
-
-Context for each analysis
-
-🎓 Educational Purpose
+## 🎓 Educational Purpose
 
 This project was developed as a demonstration of:
+- Relational database design
+- Dimensional modeling (star schema)
+- SQL query optimization
+- Business data analysis
+- Business insight generation
 
-Relational database design
+## 👤 Author
 
-Dimensional modeling (star schema)
+**Felipe De León**
+- GitHub: [@FelipeDeLeon9](https://github.com/FelipeDeLeon9)
 
-SQL query optimization
+## 📄 License
 
-Business data analysis
+This project is open source and available for educational purposes.
 
-Generation of business insights
+---
 
-👤 Author
-
-Felipe De León
-
-GitHub: @FelipeDeLeon9
-
-📄 License
-
-This project is open-source and available for educational purposes.
-
-⚡ Note: The datasets were generated with AI and do not represent real data from any organization.
+⚡ **Note**: The datasets were generated with AI and do not represent real data from any organization.
