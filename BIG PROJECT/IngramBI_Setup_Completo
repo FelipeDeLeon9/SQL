@@ -1,9 +1,9 @@
 -- ============================================================================
--- CONFIGURACIÓN INICIAL DE LA BASE DE DATOS IngramBI
+-- CONFIGURACIÓN INICIAL DE LA BASE DE DATOS
 -- ============================================================================
 -- Sistema de Business Intelligence para análisis de ventas y tickets de soporte
--- Autor: [Tu nombre]
--- Fecha: [Fecha]
+-- Autor: Felipe De León Gómez
+-- Fecha: 15/10/2025
 -- ============================================================================
 
 -- Crear la nueva base de datos para el sistema BI
