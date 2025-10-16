@@ -1,5 +1,5 @@
 -- ============================================================================
--- INGRAMBI DATABASE INITIAL CONFIGURATION
+-- RETAIL DATABASE INITIAL CONFIGURATION
 -- ============================================================================
 -- Business Intelligence System for sales analysis and support tickets
 -- Author: Felipe De León
