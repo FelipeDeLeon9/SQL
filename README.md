@@ -12,7 +12,6 @@ Este repositorio reúne ejemplos y casos que aplican conceptos de:
 Cada carpeta contiene scripts y ejemplos comentados para facilitar su comprensión y reutilización.  
 
 > 💡 Este repositorio está en constante actualización.  
-> Próximamente incluiré consultas optimizadas, stored procedures y ejemplos de integración con Python y Power BI.
 
 ---
 
